@@ -8,11 +8,11 @@ cmake_policy(SET CMP0091 NEW)
 project(yaRenderer LANGUAGES CXX C)
 
 # target
-add_executable(yaRenderer "")
+add_executable(yaRenderer "" src/include/model.h src/include/geometry.cpp src/include/geometry.h src/include/model.cpp)
 set_target_properties(yaRenderer PROPERTIES OUTPUT_NAME "yaRenderer")
 set_target_properties(yaRenderer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/windows/x86/release")
 target_include_directories(yaRenderer PRIVATE
-    include
+    src/include
 )
 target_compile_options(yaRenderer PRIVATE
     $<$<COMPILE_LANGUAGE:C>:-DNDEBUG>
@@ -33,6 +33,6 @@ if(MSVC)
 endif()
 target_sources(yaRenderer PRIVATE
     src/main.cpp
-    include/tgaimage.cpp
+    src/include/tgaimage.cpp
 )
 

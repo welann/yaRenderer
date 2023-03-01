@@ -1,10 +1,10 @@
 add_rules("mode.debug", "mode.release")
 
-add_includedirs("include")
+add_includedirs("src/include")
 
 target("yaRenderer")
     set_kind("binary")
-    add_files("src/*.cpp","include/*.cpp")
+    add_files("src/*.cpp","src/include/*.cpp")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

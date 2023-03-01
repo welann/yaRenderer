@@ -4,8 +4,10 @@ build/
 
 .vscode/
 .cache/
+.idea/
+cmake-build-debug/
 # MacOS Cache
 .DS_Store
 
 compile_commands.json
-
+CMakeLists.txt

@@ -2,15 +2,23 @@
 // Created by wzcin on 2023/3/1.
 //
 
-#ifndef YARENDERER_MODEL_H
-#define YARENDERER_MODEL_H
+#ifndef __MODEL_H__
+#define __MODEL_H__
 
+#include <vector>
+#include "geometry.h"
 
-
-class model {
-
+class Model {
+private:
+    std::vector<Vec3f> verts_;
+    std::vector<std::vector<int> > faces_;
+public:
+    Model(const char *filename);
+    ~Model();
+    int nverts();
+    int nfaces();
+    Vec3f vert(int i);
+    std::vector<int> face(int idx);
 };
 
-
-
-#endif //YARENDERER_MODEL_H
+#endif //__MODEL_H__
