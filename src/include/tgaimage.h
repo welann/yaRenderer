@@ -57,6 +57,8 @@ struct TGAColor
         }
     }
 
+    unsigned char &operator[](const int i) { return bgra[i]; }
+
     TGAColor operator*(float intensity) const
     {
         TGAColor res = *this;
