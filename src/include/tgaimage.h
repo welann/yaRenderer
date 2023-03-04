@@ -2,7 +2,7 @@
 #define __IMAGE_H__
 
 #include <fstream>
-;
+
 #pragma pack(push, 1)
 struct TGA_Header
 {
