@@ -192,14 +192,7 @@ class mat
 
 public:
     mat() {}
-    //调试功能
-    void printm() const{
-        // std::cout<<DimRows<<" "<<DimCols<<std::endl;
-        std::cout<<"======================"<<std::endl;
-        std::cout<<rows[0][0]<<" "<<rows[0][1]<<" "<<rows[0][2]<<std::endl;
-        std::cout<<rows[1][0]<<" "<<rows[1][1]<<" "<<rows[1][2]<<std::endl;
-        std::cout<<rows[2][0]<<" "<<rows[2][1]<<" "<<rows[2][2]<<std::endl;
-    }
+
     vec<DimCols, T>& operator[](const size_t idx)
     {
         assert(idx < DimRows);
@@ -237,8 +230,6 @@ public:
         return ret;
     }
 
-
-//以下几个函数似乎都和求矩阵的逆有关
     T det() const
     {
         return dt<DimCols, T>::det(*this);
@@ -274,18 +265,15 @@ public:
         return ret / tmp;
     }
 
-//总之，在这个函数里完成了矩阵的逆的计算，早晚给改了
-//具体解释在这
-//https://github.com/ssloy/tinyrenderer/wiki/Lesson-5:-Moving-the-camera#transformation-of-normal-vectors
-    mat<DimRows, DimCols, T> invert()
+    mat<DimCols, DimRows, T> invert()
     {
         return invert_transpose().transpose();
     }
-//这个函数用来计算矩阵的转置
+
     mat<DimCols, DimRows, T> transpose()
     {
         mat<DimCols, DimRows, T> ret;
-        for (size_t i = DimCols; i--; ret[i] = this->col(i))
+        for (size_t i = DimRows; i--; ret[i] = this->col(i))
             ;
         return ret;
     }
