@@ -13,7 +13,7 @@ const int width  = 800;
 const int height = 800;
 
 Vec3f light_dir(1, 1, 3);
-Vec3f eye(-1, 1, 4);
+Vec3f eye(-1, 0, 3);
 Vec3f center(0, 0, 0);
 Vec3f up(0, 1, 0);
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
         zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
     }
 
-    model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
+    model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\floor.obj)");
     light_dir.normalize();
 
     { // rendering the shadow buffer

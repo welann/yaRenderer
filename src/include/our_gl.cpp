@@ -1,6 +1,7 @@
 #include <cmath>
 #include <limits>
 #include <cstdlib>
+#include "geometry.h"
 #include "our_gl.h"
 
 Matrix ModelView;
@@ -60,11 +61,14 @@ void triangle(Vec4f *pts, IShader &shader, TGAImage &image, float *zbuffer)
 {
     Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+    Vec2f temp(0.,0.);
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 2; j++)
         {
+            // bboxmin[j] = std::max(std::min(bboxmin[j], pts[i][j] / pts[i][3]),temp[j]);
             bboxmin[j] = std::min(bboxmin[j], pts[i][j] / pts[i][3]);
+            // if(bboxmin.y<0.) bboxmin.y=0.;
             bboxmax[j] = std::max(bboxmax[j], pts[i][j] / pts[i][3]);
         }
     }
@@ -78,6 +82,7 @@ void triangle(Vec4f *pts, IShader &shader, TGAImage &image, float *zbuffer)
             float z          = pts[0][2] * c.x + pts[1][2] * c.y + pts[2][2] * c.z;
             float w          = pts[0][3] * c.x + pts[1][3] * c.y + pts[2][3] * c.z;
             int   frag_depth = z / w;
+            // std::cout <<P.x<<" "<<P.y<<" "<<P.x + P.y * image.get_width()<<std::endl;
             if (c.x < 0 || c.y < 0 || c.z < 0 || zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
             bool discard = shader.fragment(c, color);
             if (!discard)
