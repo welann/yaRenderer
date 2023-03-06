@@ -28,19 +28,17 @@ void projection(float coeff)
 
 void lookat(Vec3f eye, Vec3f center, Vec3f up)
 {
-    Vec3f  z    = (eye - center).normalize();
-    Vec3f  x    = cross(up, z).normalize();
-    Vec3f  y    = cross(z, x).normalize();
-    Matrix Minv = Matrix::identity();
-    Matrix Tr   = Matrix::identity();
+    Vec3f z   = (eye - center).normalize();
+    Vec3f x   = cross(up, z).normalize();
+    Vec3f y   = cross(z, x).normalize();
+    ModelView = Matrix::identity();
     for (int i = 0; i < 3; i++)
     {
-        Minv[0][i] = x[i];
-        Minv[1][i] = y[i];
-        Minv[2][i] = z[i];
-        Tr[i][3]   = -center[i];
+        ModelView[0][i] = x[i];
+        ModelView[1][i] = y[i];
+        ModelView[2][i] = z[i];
+        ModelView[i][3] = -center[i];
     }
-    ModelView = Minv * Tr;
 }
 
 Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P)
@@ -76,22 +74,42 @@ void triangle(mat<4, 3, float> &clipc, IShader &shader, TGAImage &image, float *
         }
     }
     Vec2i    P;
-    TGAColor color;
-    for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
-    {
-        for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
+    TGAColor color(255, 255, 255);
+
+    P.x=(bboxmin.x+bboxmax.x)/2;
+    P.y=(bboxmin.y+bboxmax.y)/2;
+
+    Vec3f bc_screen  = barycentric(pts2[0], pts2[1], pts2[2], P);
+    Vec3f bc_clip    = Vec3f(bc_screen.x / pts[0][3], bc_screen.y / pts[1][3], bc_screen.z / pts[2][3]);
+    bc_clip          = bc_clip / (bc_clip.x + bc_clip.y + bc_clip.z);
+    float frag_depth = clipc[2] * bc_clip;
+    // if (zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
+    // if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0 || zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
+    // TGAColor color(205.0*frag_depth, 205*frag_depth, 205*frag_depth);
+    shader.fragment(bc_clip, color);
+
+    if(zbuffer[P.x + P.y * image.get_width()] < frag_depth) {
+
+        for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
         {
-            Vec3f bc_screen  = barycentric(pts2[0], pts2[1], pts2[2], P);
-            Vec3f bc_clip    = Vec3f(bc_screen.x / pts[0][3], bc_screen.y / pts[1][3], bc_screen.z / pts[2][3]);
-            bc_clip          = bc_clip / (bc_clip.x + bc_clip.y + bc_clip.z);
-            float frag_depth = clipc[2] * bc_clip;
-            if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0 || zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
-            bool discard = shader.fragment(Vec3f(P.x, P.y, frag_depth), bc_clip, color);
-            if (!discard)
+            for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
             {
-                zbuffer[P.x + P.y * image.get_width()] = frag_depth;
-                image.set(P.x, P.y, color);
+                // Vec3f bc_screen  = barycentric(pts2[0], pts2[1], pts2[2], P);
+                // Vec3f bc_clip    = Vec3f(bc_screen.x / pts[0][3], bc_screen.y / pts[1][3], bc_screen.z / pts[2][3]);
+                // bc_clip          = bc_clip / (bc_clip.x + bc_clip.y + bc_clip.z);
+                // float frag_depth = clipc[2] * bc_clip;
+                // // if (zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
+                // // if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0 || zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
+                // if ( zbuffer[P.x + P.y * image.get_width()] > frag_depth) continue;
+                // TGAColor color(205.0*frag_depth, 205*frag_depth, 205*frag_depth);
+                // bool discard = shader.fragment(bc_clip, color);
+                // if (!discard)
+                // {
+                    zbuffer[P.x + P.y * image.get_width()] = frag_depth;
+                    image.set(P.x, P.y, color);
+                // }
             }
         }
     }
+
 }

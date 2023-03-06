@@ -1,5 +1,4 @@
 #include <vector>
-#include <cstdlib>
 #include <limits>
 #include <iostream>
 #include "tgaimage.h"
@@ -7,43 +6,42 @@
 #include "geometry.h"
 #include "our_gl.h"
 
-#define M_PI 3.1415926
-
-Model *model        = NULL;
-float *shadowbuffer = NULL;
+Model *model = NULL;
 
 const int width  = 800;
 const int height = 800;
 
-Vec3f eye(3, -.8, 3);
+Vec3f light_dir(1, 1, 3);
+Vec3f eye(2, 0, 4);
 Vec3f center(0, 0, 0);
 Vec3f up(0, 1, 0);
 
-TGAImage total(1024, 1024, TGAImage::GRAYSCALE);
-TGAImage occl(1024, 1024, TGAImage::GRAYSCALE);
+// struct DepthShader : public IShader
+// {
+//     mat<3, 3, float> varying_tri;
 
-struct ZShader : public IShader
-{
-    mat<4, 3, float> varying_tri;
+//     DepthShader() : varying_tri() {}
 
-    virtual Vec4f vertex(int iface, int nthvert)
-    {
-        Vec4f gl_Vertex = Projection * ModelView * embed<4>(model->vert(iface, nthvert));
-        varying_tri.set_col(nthvert, gl_Vertex);
-        return gl_Vertex;
-    }
+//     virtual Vec4f vertex(int iface, int nthvert)
+//     {
+//         Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert));         // read the vertex from .obj file
+//         gl_Vertex       = Viewport * Projection * ModelView * gl_Vertex; // transform it to screen coordinates
+//         varying_tri.set_col(nthvert, proj<3>(gl_Vertex / gl_Vertex[3]));
+//         return gl_Vertex;
+//     }
 
-    virtual bool fragment(Vec3f gl_FragCoord, Vec3f bar, TGAColor &color)
-    {
-        color = TGAColor(255, 255, 255) * ((gl_FragCoord.z + 1.f) / 2.f);
-        return false;
-    }
-};
+//     virtual bool fragment(Vec3f bar, TGAColor &color)
+//     {
+//         Vec3f p = varying_tri * bar;
+//         color   = TGAColor(255, 255, 255) * (p.z / depth);
+//         return false;
+//     }
+// };
 
 struct Shader : public IShader
 {
-    mat<2, 3, float> varying_uv;
-    mat<4, 3, float> varying_tri;
+    mat<2, 3, float> varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
+    mat<4, 3, float> varying_tri; // triangle coordinates (screen space), written by VS, read by FS
 
     virtual Vec4f vertex(int iface, int nthvert)
     {
@@ -53,114 +51,61 @@ struct Shader : public IShader
         return gl_Vertex;
     }
 
-    virtual bool fragment(Vec3f gl_FragCoord, Vec3f bar, TGAColor &color)
+    virtual bool fragment(Vec3f bar, TGAColor &color)
     {
         Vec2f uv = varying_uv * bar;
-        if (std::abs(shadowbuffer[int(gl_FragCoord.x + gl_FragCoord.y * width)] - gl_FragCoord.z) < 1e-2)
-        {
-            occl.set(uv.x * 1024, uv.y * 1024, TGAColor(255));
-        }
-        color = TGAColor(255, 0, 0);
+        color    = model->diffuse(uv);
         return false;
     }
 };
-
-struct AOShader : public IShader
-{
-    mat<2, 3, float> varying_uv;
-    mat<4, 3, float> varying_tri;
-    TGAImage         aoimage;
-
-    virtual Vec4f vertex(int iface, int nthvert)
-    {
-        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-        Vec4f gl_Vertex = Projection * ModelView * embed<4>(model->vert(iface, nthvert));
-        varying_tri.set_col(nthvert, gl_Vertex);
-        return gl_Vertex;
-    }
-
-    virtual bool fragment(Vec3f gl_FragCoord, Vec3f bar, TGAColor &color)
-    {
-        Vec2f uv = varying_uv * bar;
-        int   t  = aoimage.get(uv.x * 1024, uv.y * 1024)[0];
-        color    = TGAColor(t, t, t);
-        return false;
-    }
-};
-
-Vec3f rand_point_on_unit_sphere()
-{
-    float u     = (float)rand() / (float)RAND_MAX;
-    float v     = (float)rand() / (float)RAND_MAX;
-    float theta = 2.f * M_PI * u;
-    float phi   = acos(2.f * v - 1.f);
-    return Vec3f(sin(phi) * cos(theta), sin(phi) * sin(theta), cos(phi));
-}
 
 int main(int argc, char **argv)
 {
-    // if (2 > argc)
-    // {
-    //     std::cerr << "Usage: " << argv[0] << "obj/model.obj" << std::endl;
-    //     return 1;
-    // }
-    float *zbuffer = new float[width * height];
-    shadowbuffer   = new float[width * height];
-    model          = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
+    float *zbuffer      = new float[width * height];
+    float *shadowbuffer = new float[width * height];
+
+    for (int i = width * height; --i;)
+    {
+        zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
+    }
 
     TGAImage frame(width, height, TGAImage::RGB);
+
+    // model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
+    // light_dir.normalize();
+
+    // { // rendering the shadow buffer
+    //     TGAImage depth(width, height, TGAImage::RGB);
+    //     lookat(light_dir, center, up);
+    //     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+    //     projection(0);
+
+    //     DepthShader      depthshader;
+    //     mat<4, 3, float> screen_coords;
+    //     for (int i = 0; i < model->nfaces(); i++)
+    //     {
+    //         for (int j = 0; j < 3; j++)
+    //         {
+    //             screen_coords[0][j] = depthshader.vertex(i, j)[0];
+    //             screen_coords[1][j] = depthshader.vertex(i, j)[1];
+    //             screen_coords[2][j] = depthshader.vertex(i, j)[2];
+    //             screen_coords[3][j] = depthshader.vertex(i, j)[3];
+    //         }
+    //         triangle(screen_coords, depthshader, depth, shadowbuffer);
+    //     }
+    //     depth.flip_vertically(); // to place the origin in the bottom left corner of the image
+    //     depth.write_tga_file("depth.tga");
+    // }
+
     lookat(eye, center, up);
     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
     projection(-1.f / (eye - center).norm());
-    for (int i = width * height; i--; zbuffer[i] = -std::numeric_limits<float>::max())
-        ;
+    light_dir = proj<3>((Projection * ModelView * embed<4>(light_dir, 0.f))).normalize();
 
-    
-    // AOShader aoshader;
-    // aoshader.aoimage.read_tga_file(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\occlusion_200.tga)");
-    // aoshader.aoimage.flip_vertically();
-    // for (int i=0; i<model->nfaces(); i++) {
-    //     for (int j=0; j<3; j++) {
-    //         aoshader.vertex(i, j);
-    //     }
-    //     triangle(aoshader.varying_tri, aoshader, frame, zbuffer);
-    // }
-    // frame.flip_vertically();
-    // frame.write_tga_file("framebuffer.tga");
-    // return 0;
-    
-
-    const int nrenders = 10;
-    for (int iter = 1; iter <= nrenders; iter++)
+    for (int m = 0; m < 1; m++)
     {
-        std::cerr << iter << " from " << nrenders << std::endl;
-        for (int i = 0; i < 3; i++) up[i] = (float)rand() / (float)RAND_MAX;
-        eye   = rand_point_on_unit_sphere();
-        eye.y = std::abs(eye.y);
-        std::cout << "v " << eye << std::endl;
-
-        for (int i = width * height; i--; shadowbuffer[i] = zbuffer[i] = -std::numeric_limits<float>::max())
-            ;
-
-        TGAImage frame(width, height, TGAImage::RGB);
-        lookat(eye, center, up);
-        viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-        projection(0); //-1.f/(eye-center).norm());
-
-        ZShader zshader;
-        for (int i = 0; i < model->nfaces(); i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                zshader.vertex(i, j);
-            }
-            triangle(zshader.varying_tri, zshader, frame, shadowbuffer);
-        }
-        
-        frame.flip_vertically();
-        frame.write_tga_file("framebuffer.tga");
+        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
         Shader shader;
-        occl.clear();
         for (int i = 0; i < model->nfaces(); i++)
         {
             for (int j = 0; j < 3; j++)
@@ -169,24 +114,11 @@ int main(int argc, char **argv)
             }
             triangle(shader.varying_tri, shader, frame, zbuffer);
         }
-
-        //        occl.gaussian_blur(5);
-        for (int i = 0; i < 1024; i++)
-        {
-            for (int j = 0; j < 1024; j++)
-            {
-                float tmp = total.get(i, j)[0];
-                total.set(i, j, TGAColor((tmp * (iter - 1) + occl.get(i, j)[0]) / (float)iter + .5f));
-            }
-        }
+        delete model;
     }
-    total.flip_vertically();
-    total.write_tga_file("occlusion.tga");
-    occl.flip_vertically();
-    occl.write_tga_file("occl.tga");
+    frame.flip_vertically(); // to place the origin in the bottom left corner of the image
+    frame.write_tga_file("framebuffer.tga");
 
     delete[] zbuffer;
-    delete model;
-    delete[] shadowbuffer;
     return 0;
 }
