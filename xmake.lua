@@ -1,12 +1,33 @@
 add_rules("mode.debug", "mode.release")
+set_languages("c++17")
+
+add_requires("glm")
+add_requires("assimp")
+
 
 add_includedirs("src/include")
+add_includedirs("external")
+add_includedirs("src/shader")
 
-target("yaRenderer")
-    set_kind("binary")
-    add_files("src/*.cpp","src/include/*.cpp")
 
---
+--add_cxflags("/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib",{force = true})
+-- add_ldflags("/NODEFAULTLIB:LIBCMT", {force = true})
+
+ target("yaRenderer")
+     set_kind("binary")
+     add_files("src/*.cpp","src/include/*.cpp")
+     add_packages("glm","assimp")
+
+
+--target("test")
+--    set_kind("binary")
+--    add_files("src/test.cpp")
+--    add_packages("glm","assimp")
+
+
+
+
+
 -- If you want to known more usage about xmake, please see https://xmake.io
 --
 -- ## FAQ
