@@ -76,6 +76,8 @@ glm::vec3 Model::vert(const int i) const
 
 glm::vec3 Model::vert(const int iface, const int nthvert) const
 {
+
+    //存储结构： facet_vrt存储每个面的第几个点(0,1,2)对应总的第几个点
     return verts[facet_vrt[iface * 3 + nthvert]];
 }
 

@@ -7,6 +7,8 @@
 
 class Model
 {
+    
+
     std::vector<glm::vec3> verts{};     // array of vertices
     std::vector<glm::vec2> tex_coord{}; // per-vertex array of tex coords
     std::vector<glm::vec3> norms{};     // per-vertex array of normal vectors

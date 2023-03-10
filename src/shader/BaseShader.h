@@ -1,7 +1,8 @@
 #include"our_gl.h"
 #include<glm/glm.hpp>
 #include"model.h"
-
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
 extern glm::mat4 ModelView; // "OpenGL" state matrices
 extern glm::mat4 Projection;
@@ -10,24 +11,30 @@ extern glm::vec3 light_dir; // light source
 
 struct Shader : IShader
 {
-    const Model &model;
+    const aiMesh& mesh;
+
     glm::vec3    uniform_l;   // light direction in view coordinates
     glm::mat2x3  varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
     glm::mat3    varying_nrm; // normal per vertex to be interpolated by FS
     glm::mat3    view_tri;    // triangle in view coordinates
 
-    Shader(const Model &m) : model(m)
+    Shader(const aiMesh &m) : mesh(m)
     {
         uniform_l = glm::normalize(proj<3>((ModelView * embed<4>(light_dir, 0.)))); // transform the light vector to view coordinates
     }
 
     virtual void vertex(const int iface, const int nthvert, glm::vec4 &gl_Position)
     {
-        set_col(varying_uv, nthvert, model.uv(iface, nthvert));
+        set_col(varying_uv, nthvert, mesh.uv(iface, nthvert));
         set_col(varying_nrm, nthvert, proj<3>(invert_transpose(ModelView) * embed<4>(model.normal(iface, nthvert))));
         gl_Position = ModelView * embed<4>(model.vert(iface, nthvert));
         set_col(view_tri, nthvert, proj<3>(gl_Position));
         gl_Position = Projection * gl_Position;
+
+
+
+
+
     }
 
     virtual bool fragment(const glm::vec3 bar, TGAColor &gl_FragColor)

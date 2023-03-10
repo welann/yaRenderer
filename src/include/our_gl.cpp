@@ -1,4 +1,7 @@
 #include "geometry.h"
+#include <glm/glm.hpp>
+#include "glm/ext/matrix_transform.hpp"
+#include <glm/ext/matrix_clip_space.hpp>
 
 #include "our_gl.h"
 
@@ -8,36 +11,48 @@ glm::mat4 Projection;
 
 void viewport(const int x, const int y, const int w, const int h)
 {
-    Viewport = {{w / 2., 0, 0, x + w / 2.},
-                {0, h / 2., 0, y + h / 2.},
-                {0, 0, 1, 0},
-                {0, 0, 0, 1}};
+    // Viewport = {{w / 2., 0, 0, x + w / 2.},
+    //             {0, h / 2., 0, y + h / 2.},
+    //             {0, 0, 1, 0},
+    //             {0, 0, 0, 1}};
+     Viewport = glm::ortho<float>(x, x + w, y + h, y, -1.0f, 1.0f);
 }
 
 void projection(const double f)
 { // check https://en.wikipedia.org/wiki/Camera_matrix
-    Projection = {{1, 0, 0, 0},
-                  {0, -1, 0, 0},
-                  {0, 0, 1, 0},
-                  {0, 0, -1 / f, 0}};
+  // Projection = {{1, 0, 0, 0},
+  //               {0, -1, 0, 0},
+  //               {0, 0, 1, 0},
+  //               {0, 0, -1 / f, 0}};
+    Projection = glm::perspective(
+        glm::radians(45.0f),          // The vertical Field of View, in radians: the amount of "zoom". Think "camera lens". Usually between 90&deg; (extra wide) and 30&deg; (quite zoomed in)
+        1.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 == 1280/960, sounds familiar ?
+        0.1f,                         // Near clipping plane. Keep as big as possible, or you'll get precision issues.
+        100.0f                        // Far clipping plane. Keep as little as possible.
+    );
 }
 
 void lookat(const glm::vec3 eye, const glm::vec3 center, const glm::vec3 up)
 { // check https://github.com/ssloy/tinyrenderer/wiki/Lesson-5-Moving-the-camera
-    glm::vec3 z    = glm::normalize(center - eye);
-    glm::vec3 x    = glm::normalize(glm::cross(up, z));
-    glm::vec3 y    = glm::normalize(glm::cross(z, x));
-    
-    glm::mat4 Minv = {{x.x, x.y, x.z, 0},
-                      {y.x, y.y, y.z, 0},
-                      {z.x, z.y, z.z, 0},
-                      {0, 0, 0, 1}};
+  // glm::vec3 z    = glm::normalize(center - eye);
+  // glm::vec3 x    = glm::normalize(glm::cross(up, z));
+  // glm::vec3 y    = glm::normalize(glm::cross(z, x));
 
-    glm::mat4 Tr   = {{1, 0, 0, -eye.x},
-                      {0, 1, 0, -eye.y},
-                      {0, 0, 1, -eye.z},
-                      {0, 0, 0, 1}};
-    ModelView      = Minv * Tr;
+    // glm::mat4 Minv = {{x.x, x.y, x.z, 0},
+    //                   {y.x, y.y, y.z, 0},
+    //                   {z.x, z.y, z.z, 0},
+    //                   {0, 0, 0, 1}};
+
+    // glm::mat4 Tr   = {{1, 0, 0, -eye.x},
+    //                   {0, 1, 0, -eye.y},
+    //                   {0, 0, 1, -eye.z},
+    //                   {0, 0, 0, 1}};
+    // ModelView      = Minv * Tr;
+    ModelView = glm::lookAt(
+        eye,    // the position of your camera, in world space
+        center, // where you want to look at, in world space
+        up      // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
+    );
 }
 
 glm::vec3 barycentric(const glm::vec2 tri[3], const glm::vec2 P)
