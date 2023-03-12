@@ -2,9 +2,12 @@ add_rules("mode.debug", "mode.release")
 
 add_includedirs("src/include")
 
+add_requires("glm","eigen")
+
 target("yaRenderer")
     set_kind("binary")
     add_files("src/*.cpp","src/include/*.cpp")
+    add_packages("glm","eigen")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

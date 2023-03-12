@@ -16,28 +16,6 @@ Vec3f eye(2, 0, 4);
 Vec3f center(0, 0, 0);
 Vec3f up(0, 1, 0);
 
-// struct DepthShader : public IShader
-// {
-//     mat<3, 3, float> varying_tri;
-
-//     DepthShader() : varying_tri() {}
-
-//     virtual Vec4f vertex(int iface, int nthvert)
-//     {
-//         Vec4f gl_Vertex = embed<4>(model->vert(iface, nthvert));         // read the vertex from .obj file
-//         gl_Vertex       = Viewport * Projection * ModelView * gl_Vertex; // transform it to screen coordinates
-//         varying_tri.set_col(nthvert, proj<3>(gl_Vertex / gl_Vertex[3]));
-//         return gl_Vertex;
-//     }
-
-//     virtual bool fragment(Vec3f bar, TGAColor &color)
-//     {
-//         Vec3f p = varying_tri * bar;
-//         color   = TGAColor(255, 255, 255) * (p.z / depth);
-//         return false;
-//     }
-// };
-
 struct Shader : public IShader
 {
     mat<2, 3, float> varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
@@ -71,32 +49,6 @@ int main(int argc, char **argv)
 
     TGAImage frame(width, height, TGAImage::RGB);
 
-    // model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
-    // light_dir.normalize();
-
-    // { // rendering the shadow buffer
-    //     TGAImage depth(width, height, TGAImage::RGB);
-    //     lookat(light_dir, center, up);
-    //     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-    //     projection(0);
-
-    //     DepthShader      depthshader;
-    //     mat<4, 3, float> screen_coords;
-    //     for (int i = 0; i < model->nfaces(); i++)
-    //     {
-    //         for (int j = 0; j < 3; j++)
-    //         {
-    //             screen_coords[0][j] = depthshader.vertex(i, j)[0];
-    //             screen_coords[1][j] = depthshader.vertex(i, j)[1];
-    //             screen_coords[2][j] = depthshader.vertex(i, j)[2];
-    //             screen_coords[3][j] = depthshader.vertex(i, j)[3];
-    //         }
-    //         triangle(screen_coords, depthshader, depth, shadowbuffer);
-    //     }
-    //     depth.flip_vertically(); // to place the origin in the bottom left corner of the image
-    //     depth.write_tga_file("depth.tga");
-    // }
-
     lookat(eye, center, up);
     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
     projection(-1.f / (eye - center).norm());
@@ -104,7 +56,7 @@ int main(int argc, char **argv)
 
     for (int m = 0; m < 1; m++)
     {
-        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
+        model = new Model("/workspaces/yaRenderer/models/diablo3_pose/diablo3_pose.obj");
         Shader shader;
         for (int i = 0; i < model->nfaces(); i++)
         {
