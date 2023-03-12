@@ -1,106 +1,92 @@
 #include <iostream>
+#include <string>
+#include <fstream>
 #include <sstream>
+#include <vector>
 #include "model.h"
 
-Model::Model(const std::string filename)
-{
+Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), diffusemap_() {
     std::ifstream in;
-    in.open(filename, std::ifstream::in);
+    in.open (filename, std::ifstream::in);
     if (in.fail()) return;
     std::string line;
-    while (!in.eof())
-    {
+    while (!in.eof()) {
         std::getline(in, line);
         std::istringstream iss(line.c_str());
-        char               trash;
-        if (!line.compare(0, 2, "v "))
-        {
+        char trash;
+        if (!line.compare(0, 2, "v ")) {
             iss >> trash;
-            glm::vec3 v;
-            for (int i = 0; i < 3; i++) iss >> v[i];
-            verts.push_back(v);
-        }
-        else if (!line.compare(0, 3, "vn "))
-        {
+            Vec3f v;
+            for (int i=0;i<3;i++) iss >> v[i];
+            verts_.push_back(v);
+        } else if (!line.compare(0, 3, "vn ")) {
             iss >> trash >> trash;
-            glm::vec3 n;
-            for (int i = 0; i < 3; i++) iss >> n[i];
-            norms.push_back(glm::normalize(n));
-        }
-        else if (!line.compare(0, 3, "vt "))
-        {
+            Vec3f n;
+            for (int i=0;i<3;i++) iss >> n[i];
+            norms_.push_back(n);
+        } else if (!line.compare(0, 3, "vt ")) {
             iss >> trash >> trash;
-            glm::vec2 uv;
-            for (int i = 0; i < 2; i++) iss >> uv[i];
-            tex_coord.push_back({uv.x, 1 - uv.y});
-        }
-        else if (!line.compare(0, 2, "f "))
-        {
-            int f, t, n;
+            Vec2f uv;
+            for (int i=0;i<2;i++) iss >> uv[i];
+            uv_.push_back(uv);
+        }  else if (!line.compare(0, 2, "f ")) {
+            std::vector<Vec3i> f;
+            Vec3i tmp;
             iss >> trash;
-            int cnt = 0;
-            while (iss >> f >> trash >> t >> trash >> n)
-            {
-                facet_vrt.push_back(--f);
-                facet_tex.push_back(--t);
-                facet_nrm.push_back(--n);
-                cnt++;
+            while (iss >> tmp[0] >> trash >> tmp[1] >> trash >> tmp[2]) {
+                for (int i=0; i<3; i++) tmp[i]--; // in wavefront obj all indices start at 1, not zero
+                f.push_back(tmp);
             }
-            if (3 != cnt)
-            {
-                std::cerr << "Error: the obj file is supposed to be triangulated" << std::endl;
-                return;
-            }
+            faces_.push_back(f);
         }
     }
-    std::cerr << "# v# " << nverts() << " f# " << nfaces() << " vt# " << tex_coord.size() << " vn# " << norms.size() << std::endl;
-    load_texture(filename, "_diffuse.tga", diffusemap);
-    load_texture(filename, "_nm_tangent.tga", normalmap);
-    load_texture(filename, "_spec.tga", specularmap);
+    std::cerr << "# v# " << verts_.size() << " f# "  << faces_.size() << " vt# " << uv_.size() << " vn# " << norms_.size() << std::endl;
+    load_texture(filename, "_diffuse.tga", diffusemap_);
 }
 
-int Model::nverts() const
-{
-    return verts.size();
+Model::~Model() {
 }
 
-int Model::nfaces() const
-{
-    return facet_vrt.size() / 3;
+int Model::nverts() {
+    return (int)verts_.size();
 }
 
-glm::vec3 Model::vert(const int i) const
-{
-    return verts[i];
+int Model::nfaces() {
+    return (int)faces_.size();
 }
 
-glm::vec3 Model::vert(const int iface, const int nthvert) const
-{
-
-    //存储结构： facet_vrt存储每个面的第几个点(0,1,2)对应总的第几个点
-    return verts[facet_vrt[iface * 3 + nthvert]];
+std::vector<int> Model::face(int idx) {
+    std::vector<int> face;
+    for (int i=0; i<(int)faces_[idx].size(); i++) face.push_back(faces_[idx][i][0]);
+    return face;
 }
 
-void Model::load_texture(std::string filename, const std::string suffix, TGAImage &img)
-{
-    size_t dot = filename.find_last_of(".");
-    if (dot == std::string::npos) return;
-    std::string texfile = filename.substr(0, dot) + suffix;
-    std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
+Vec3f Model::vert(int i) {
+    return verts_[i];
 }
 
-glm::vec3 Model::normal(const glm::vec2 &uvf) const
-{
-    TGAColor c = normalmap.get(uvf[0] * normalmap.width(), uvf[1] * normalmap.height());
-    return glm::vec3{(double)c[2]* (2. / 255.), (double)c[1]* (2. / 255.), (double)c[0]* (2. / 255.)}  - glm::vec3{1, 1, 1};
+void Model::load_texture(std::string filename, const char *suffix, TGAImage &img) {
+    std::string texfile(filename);
+    size_t dot = texfile.find_last_of(".");
+    if (dot!=std::string::npos) {
+        texfile = texfile.substr(0,dot) + std::string(suffix);
+        std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
+        img.flip_vertically();
+    }
 }
 
-glm::vec2 Model::uv(const int iface, const int nthvert) const
-{
-    return tex_coord[facet_tex[iface * 3 + nthvert]];
+TGAColor Model::diffuse(Vec2i uv) {
+    return diffusemap_.get(uv.x, uv.y);
 }
 
-glm::vec3 Model::normal(const int iface, const int nthvert) const
-{
-    return norms[facet_nrm[iface * 3 + nthvert]];
+Vec2i Model::uv(int iface, int nvert) {
+    int idx = faces_[iface][nvert][1];
+    return Vec2i(uv_[idx].x*diffusemap_.get_width(), uv_[idx].y*diffusemap_.get_height());
 }
+
+Vec3f Model::norm(int iface, int nvert) {
+    int idx = faces_[iface][nvert][2];
+    return norms_[idx].normalize();
+}
+
+

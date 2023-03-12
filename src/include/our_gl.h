@@ -15,4 +15,4 @@ struct IShader
     virtual bool fragment(const glm::vec3 bar, TGAColor &color) = 0;
 };
 
-void triangle(const glm::vec4 clip_verts[3], IShader &shader, TGAImage &image, std::vector<double> &zbuffer);
+void triangle(glm::vec4 clip_verts[3], IShader &shader, TGAImage &image, std::vector<double> &zbuffer);

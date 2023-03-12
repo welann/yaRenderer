@@ -3,6 +3,7 @@ set_languages("c++17")
 
 add_requires("glm")
 add_requires("assimp")
+add_requires("eigen")
 
 
 add_includedirs("src/include")
@@ -15,14 +16,14 @@ add_includedirs("src/shader")
 
  target("yaRenderer")
      set_kind("binary")
-     add_files("src/main.cpp","src/include/*.cpp")
-     add_packages("glm","assimp")
+     add_files("src/main.cpp","src/include/tgaimage.cpp","src/include/model.cpp")
+     add_packages("glm","assimp","eigen")
 
 
 target("test")
    set_kind("binary")
-   add_files("src/test.cpp","src/include/*.cpp")
-   add_packages("glm","assimp")
+   add_files("src/test.cpp")
+   add_packages("glm","assimp","eigen")
 
 
 
