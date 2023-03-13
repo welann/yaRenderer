@@ -98,8 +98,8 @@ int main(int argc, char **argv)
                 shader.vertex(i, j);
             }
             // Eigen::Matrix<float, 4, 3> clipc2;
-            // triangle2(shader.varying_triMatrix, shader, frame, zbuffer);
-            triangle(shader.varying_tri, shader, frame, zbuffer);
+            triangle2(shader.varying_triMatrix, shader, frame, zbuffer);
+            // triangle(shader.varying_tri, shader, frame, zbuffer);
         }
         delete model;
     }
