@@ -21,27 +21,20 @@ IShader::~IShader() {}
 
 void viewport(int x, int y, int w, int h)
 {
-    Viewport       = Matrix::identity();
-    Viewport[0][3] = x + w / 2.f;
-    Viewport[1][3] = y + h / 2.f;
-    Viewport[2][3] = 1.f;
-    Viewport[0][0] = w / 2.f;
-    Viewport[1][1] = h / 2.f;
-    Viewport[2][2] = 0;
+    // Viewport       = Matrix::identity();
+    // Viewport[0][3] = x + w / 2.f;
+    // Viewport[1][3] = y + h / 2.f;
+    // Viewport[2][3] = 1.f;
+    // Viewport[0][0] = w / 2.f;
+    // Viewport[1][1] = h / 2.f;
+    // Viewport[2][2] = 0;
 
-    cout << "Viewport===================" << endl;
-    for (int i = 0; i < 4; i++)
-    {
-        cout << Viewport[i][0] << " " << Viewport[i][1] << " " << Viewport[i][2] << " " << Viewport[i][3] << endl;
-    }
-    cout << endl;
-    cout << "ViewportMatrix============" << endl;
+
     ViewportMatrix << w / 2.0f, 0, 0, x + w / 2.f,
         0, h / 2.0f, 0, y + h / 2.f,
         0, 0, 0, 1.f,
         0, 0, 0, 1;
 
-    cout << ViewportMatrix << endl;
 }
 
 void projection(float coeff)
@@ -52,14 +45,6 @@ void projection(float coeff)
     ProjectionMatrix.setIdentity(4, 4);
     ProjectionMatrix(3, 2) = coeff;
 
-    cout << "Projection===================" << endl;
-    for (int i = 0; i < 4; i++)
-    {
-        cout << Projection[i][0] << " " << Projection[i][1] << " " << Projection[i][2] << " " << Projection[i][3] << endl;
-    }
-    cout << endl;
-    cout << "ProjectionMatrix============" << endl;
-    cout << ProjectionMatrix << endl;
 }
 
 void lookat(Vec3f eye, Vec3f center, Vec3f up)
@@ -75,13 +60,6 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up)
         ModelView[2][i] = z[i];
         ModelView[i][3] = -center[i];
     }
-
-    cout << "ModelView===================" << endl;
-    for (int i = 0; i < 4; i++)
-    {
-        cout << ModelView[i][0] << " " << ModelView[i][1] << " " << ModelView[i][2] << " " << ModelView[i][3] << endl;
-    }
-    cout << endl;
 
     Eigen::Vector3f eye1(eye.x, eye.y, eye.z);
     Eigen::Vector3f center1(center.x, center.y, center.z);
@@ -100,9 +78,6 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up)
         ModelViewMatrix(2, i) = z1(i);
         ModelViewMatrix(i, 3) = -center1(i);
     }
-
-    cout << "ModelViewMatrix============" << endl;
-    cout << ModelViewMatrix << endl;
 }
 
 Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P)

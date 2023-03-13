@@ -28,32 +28,31 @@ struct Shader : public IShader
     mat<2, 3, float> varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
     mat<4, 3, float> varying_tri; // triangle coordinates (screen space), written by VS, read by FS
 
-    Eigen::Matrix<float,4,3> varying_triMatrix; 
+    Eigen::Matrix<float, 2, 3> varying_uvMatrix;
+    Eigen::Matrix<float, 4, 3> varying_triMatrix;
 
     virtual Vec4f vertex(int iface, int nthvert)
     {
         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+        varying_uvMatrix.col(nthvert)= Eigen::Vector2f(model->uv(iface, nthvert).x,model->uv(iface, nthvert).y);
+        
         Vec4f gl_Vertex = Projection * ModelView * embed<4>(model->vert(iface, nthvert));
-        // std::cout<<"Vertex "<<gl_Vertex[0]<<" "<<gl_Vertex[1]<<" "<<gl_Vertex[2]<<" "<<gl_Vertex[3]<<"\n";
-        //=============
+
         Vec3f           vert = model->vert(iface, nthvert);
         Eigen::Vector4f inflateVert;
         inflateVert << vert[0], vert[1], vert[2], 1.0f;
         Eigen::Vector4f Gl_Vertex = ProjectionMatrix * ModelViewMatrix * inflateVert;
-        // std::cout<<"Evert "<<Gl_Vertex <<std::endl;
-        //============
+
         varying_tri.set_col(nthvert, gl_Vertex);
-        // varying_triMatrix.col(nthvert) = Gl_Vertex;
-        varying_triMatrix<<varying_tri[0][0],varying_tri[0][1],varying_tri[0][2],
-                            varying_tri[1][0],varying_tri[1][1],varying_tri[1][2],
-                            varying_tri[2][0],varying_tri[2][1],varying_tri[2][2],
-                            varying_tri[3][0],varying_tri[3][1],varying_tri[3][2];
+        varying_triMatrix.col(nthvert) = Gl_Vertex;
+
         return gl_Vertex;
     }
 
     virtual bool fragment(Vec3f bar, TGAColor &color)
     {
         Vec2f uv = varying_uv * bar;
+        
         color    = model->diffuse(uv);
         return false;
     }
@@ -74,8 +73,8 @@ int main(int argc, char **argv)
     lookat(eye, center, up);
     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
     projection(-1.f / (eye - center).norm());
+
     light_dir = proj<3>((Projection * ModelView * embed<4>(light_dir, 0.f))).normalize();
-    // std::cout<<"Light: "<<light_dir[0]<<" "<<light_dir[1]<<" "<<light_dir[2]<<std::endl;
 
     Eigen::Vector4f inflatelight;
     inflatelight << Light_dir, 0.0f;
@@ -85,11 +84,10 @@ int main(int argc, char **argv)
     Light_dir << Light(0), Light(1), Light(2);
     Light_dir.normalize();
 
-    // std::cout<<"LightE: "<<Light_dir<<std::endl;
 
     for (int m = 0; m < 1; m++)
     {
-        model = new Model("/workspaces/yaRenderer/models/diablo3_pose/diablo3_pose.obj");
+        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
         Shader shader;
         for (int i = 0; i < model->nfaces(); i++)
         {
@@ -97,7 +95,6 @@ int main(int argc, char **argv)
             {
                 shader.vertex(i, j);
             }
-            // Eigen::Matrix<float, 4, 3> clipc2;
             triangle2(shader.varying_triMatrix, shader, frame, zbuffer);
             // triangle(shader.varying_tri, shader, frame, zbuffer);
         }
