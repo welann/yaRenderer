@@ -135,7 +135,7 @@ vec<LEN, T> embed(const vec<DIM, T>& v, T fill = 1)
     return ret;
 }
 
-template <size_t LEN, size_t DIM, typename T>
+template <size_t LEN, size_t DIM, typename T> 
 vec<LEN, T> proj(const vec<DIM, T>& v)
 {
     vec<LEN, T> ret;

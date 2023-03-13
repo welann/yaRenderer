@@ -3,9 +3,15 @@
 #include "tgaimage.h"
 #include "geometry.h"
 
+#include <Eigen/Dense>
+
 extern Matrix ModelView;
 extern Matrix Projection;
 extern Matrix Viewport;
+
+extern Eigen::Matrix4f ModelViewMatrix;
+extern Eigen::Matrix4f ViewportMatrix;
+extern Eigen::Matrix4f ProjectionMatrix;
 
 const float   depth = 2000.f;
 
@@ -22,4 +28,7 @@ struct IShader
 
 // void triangle(Vec4f *pts, IShader &shader, TGAImage &image, float *zbuffer);
 void triangle(mat<4, 3, float> &pts, IShader &shader, TGAImage &image, float *zbuffer);
+
+void triangle2(Eigen::Matrix<float, 4, 3> &clipc, IShader &shader, TGAImage &image, float *zbuffer);
+
 #endif //__OUR_GL_H__
