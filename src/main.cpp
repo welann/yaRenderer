@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     for (int m = 0; m < 1; m++)
     {
-        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
+        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\floor.obj)");
         Shader shader;
         for (int i = 0; i < model->nfaces(); i++)
         {

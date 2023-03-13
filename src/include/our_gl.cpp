@@ -204,7 +204,6 @@ void triangle2(Eigen::Matrix<float, 4, 3> &clipc, IShader &shader, TGAImage &ima
         temp << pts(i, 0) / pts(i, 3), pts(i, 1) / pts(i, 3);
         pts2(i, 0) = temp[0];
         pts2(i, 1) = temp[1];
-        // pts2(i, 1) << temp[1];
     }
     Eigen::Vector2f bboxmin, bboxmax;
     bboxmin << std::numeric_limits<float>::max(), std::numeric_limits<float>::max();
