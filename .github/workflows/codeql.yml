@@ -46,9 +46,6 @@ jobs:
       uses: xmake-io/github-action-setup-xmake@v1
     
     - run: |
-        xrepo install glm
-        xrepo install assimp
-        xrepo install eigen
         xmake project -k cmakelists -y
     
     # Initializes the CodeQL tools for scanning.
