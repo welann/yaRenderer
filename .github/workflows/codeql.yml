@@ -47,7 +47,8 @@ jobs:
     
     - run: |
         xrepo install --yes glm assimp eigen 
-        xmake project -k --yes cmakelists 
+        xmake build --yes
+        xmake project -k cmakelists 
     
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
