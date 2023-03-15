@@ -45,7 +45,11 @@ jobs:
     - name: Preparexmake
       uses: xmake-io/github-action-setup-xmake@v1
     
-    - run: xmake project -k cmakelists
+    - run: |
+        xrepo install glm
+        xrepo install assimp
+        xrepo install eigen
+        xmake project -k cmakelists -y
     
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
