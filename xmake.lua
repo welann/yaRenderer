@@ -9,12 +9,13 @@ add_includedirs("src/external/imgui","src/external/imgui/backends")
 
 add_requires("glm","eigen")
 add_requires("glfw")
+add_requires("assimp")
 -- add_requires("imgui", {configs = {glfw_opengl3 = true }})
 
 target("yaRenderer")
     set_kind("binary")
     add_files("src/main.cpp","src/include/*.cpp")
-    add_packages("glm","eigen")
+    add_packages("glm","eigen","assimp")
 
 -- target("test")
 --     set_kind("binary")

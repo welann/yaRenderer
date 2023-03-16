@@ -35,9 +35,7 @@ int main(int argc, char **argv)
 
     lookat(Eye,Center,Up);
     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-    projection(-1.f / (eye - center).norm());
-
-    // light_dir = proj<3>((Projection * ModelView * embed<4>(light_dir, 0.f))).normalize();
+    projection(-1.f / (Eye - Center).norm());
 
     Eigen::Vector4f inflatelight;
     inflatelight << Light_dir, 0.0f;
@@ -49,7 +47,7 @@ int main(int argc, char **argv)
 
     for (int m = 0; m < 1; m++)
     {
-        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\floor.obj)");
+        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
         Shader shader;
         Render render(model, shader, &frame, zbuffer);
         render.Rendering();
