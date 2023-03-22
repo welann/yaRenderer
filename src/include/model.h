@@ -31,6 +31,6 @@ public:
     Vec2f            uv(int iface, int nthvert);
     TGAColor         diffuse(Vec2f uv);
     float            specular(Vec2f uv);
-    std::vector<int> face(int idx);
+    // std::vector<int> face(int idx);
 };
 #endif //__MODEL_H__
