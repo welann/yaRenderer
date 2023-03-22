@@ -5,51 +5,57 @@
 # project
 cmake_minimum_required(VERSION 3.15.0)
 cmake_policy(SET CMP0091 NEW)
-project(test LANGUAGES CXX C)
+project(yaRenderer LANGUAGES CXX C)
 
 # target
-add_executable(test "")
-set_target_properties(test PROPERTIES OUTPUT_NAME "test")
-set_target_properties(test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "c:/Users/wzcin/CLionProjects/yaRenderer/build/windows/x86/debug")
-target_include_directories(test PRIVATE
+add_executable(yaRenderer "")
+set_target_properties(yaRenderer PROPERTIES OUTPUT_NAME "yaRenderer")
+set_target_properties(yaRenderer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "c:/Users/wzcin/CLionProjects/yaRenderer/build/windows/x86/debug")
+target_include_directories(yaRenderer PRIVATE
     src/include
-    external
+    src/shader
+    src/external/imgui
+    src/external/imgui/backends
 )
-target_include_directories(test PRIVATE
+target_include_directories(yaRenderer PRIVATE
     C:/Users/wzcin/AppData/Local/.xmake/packages/g/glm/0.9.9+8/32d5691c480f471f934dd95ba9c80650/include
+    C:/Users/wzcin/AppData/Local/.xmake/packages/e/eigen/3.4.0/1e3fb853352e4e3a858999162e9dedd3/include
+    C:/Users/wzcin/AppData/Local/.xmake/packages/e/eigen/3.4.0/1e3fb853352e4e3a858999162e9dedd3/include/eigen3
     C:/Users/wzcin/AppData/Local/.xmake/packages/a/assimp/v5.2.5/d9dd1f2adb6b4eaba46d26cb4807ec39/include
     C:/Users/wzcin/AppData/Local/.xmake/packages/z/zlib/v1.2.13/01dba5cf18044069baac5e77ea4c85fa/include
 )
-target_compile_options(test PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib>
-    $<$<COMPILE_LANGUAGE:CXX>:/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib>
-)
-set_target_properties(test PROPERTIES CXX_EXTENSIONS OFF)
-target_compile_features(test PRIVATE cxx_std_17)
+set_target_properties(yaRenderer PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(yaRenderer PRIVATE cxx_std_14)
 if(MSVC)
-    target_compile_options(test PRIVATE $<$<CONFIG:Debug>:-Od>)
+    target_compile_options(yaRenderer PRIVATE $<$<CONFIG:Debug>:-Od>)
 else()
-    target_compile_options(test PRIVATE -O0)
+    target_compile_options(yaRenderer PRIVATE -O0)
 endif()
 if(MSVC)
-    target_compile_options(test PRIVATE -Zi)
+    target_compile_options(yaRenderer PRIVATE -Zi)
 else()
-    target_compile_options(test PRIVATE -g)
+    target_compile_options(yaRenderer PRIVATE -g)
 endif()
 if(MSVC)
-    set_property(TARGET test PROPERTY
+    set_property(TARGET yaRenderer PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
-target_link_libraries(test PRIVATE
+target_link_libraries(yaRenderer PRIVATE
     assimp-vc143-mt
     zlib
     advapi32
 )
-target_link_directories(test PRIVATE
+target_link_directories(yaRenderer PRIVATE
     C:/Users/wzcin/AppData/Local/.xmake/packages/a/assimp/v5.2.5/d9dd1f2adb6b4eaba46d26cb4807ec39/lib
     C:/Users/wzcin/AppData/Local/.xmake/packages/z/zlib/v1.2.13/01dba5cf18044069baac5e77ea4c85fa/lib
 )
-target_sources(test PRIVATE
-    src/test.cpp
+target_sources(yaRenderer PRIVATE
+    src/main.cpp
+    src/include/Amodel.cpp
+    src/include/camera.cpp
+    src/include/model.cpp
+    src/include/Render.cpp
+    src/include/texture.cpp
+    src/include/tgaimage.cpp
 )
 

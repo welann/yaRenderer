@@ -1,34 +1,27 @@
 add_rules("mode.debug", "mode.release")
-set_languages("c++17")
 
-add_requires("glm")
-add_requires("assimp")
-add_requires("eigen")
-
+set_languages("c++14")
 
 add_includedirs("src/include")
-add_includedirs("src/external")
 add_includedirs("src/shader")
+add_includedirs("src/external/imgui","src/external/imgui/backends")
 
 
---add_cxflags("/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib",{force = true})
--- add_ldflags("/NODEFAULTLIB:LIBCMT", {force = true})
+add_requires("glm","eigen")
+add_requires("glfw")
+add_requires("assimp")
+-- add_requires("imgui", {configs = {glfw_opengl3 = true }})
 
- target("yaRenderer")
-     set_kind("binary")
-     add_files("src/main.cpp","src/include/tgaimage.cpp","src/include/model.cpp")
-     add_packages("glm","assimp","eigen")
+target("yaRenderer")
+    set_kind("binary")
+    add_files("src/main.cpp","src/include/*.cpp")
+    add_packages("glm","eigen","assimp")
 
-
-target("test")
-   set_kind("binary")
-   add_files("src/test.cpp")
-   add_packages("glm","assimp","eigen")
-
-
-
-
-
+-- target("test")
+--     set_kind("binary")
+--     add_files("src/test.cpp","src/external/imgui/*.cpp","src/external/imgui/backends/imgui_impl_opengl3.cpp","src/external/imgui/backends/imgui_impl_glfw.cpp")
+--     add_packages("glfw")
+--
 -- If you want to known more usage about xmake, please see https://xmake.io
 --
 -- ## FAQ
