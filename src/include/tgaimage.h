@@ -70,7 +70,7 @@ struct TGAColor
 
 class TGAImage
 {
-protected:
+public:
     unsigned char *data;
     int            width;
     int            height;

@@ -6,22 +6,18 @@
 
 #include <Eigen/Dense>
 
-Model *model = NULL;
+Model  *model  = nullptr;
+Amodel *amodel = nullptr;
 
-const int width  = 800;
-const int height = 800;
-
-Vec3f light_dir(1, 1, 3);
-Vec3f eye(2, 0, 4);
-Vec3f center(0, 0, 0);
-Vec3f up(0, 1, 0);
+const int width  = 1024;
+const int height = 1024;
 
 Eigen::Vector3f Light_dir{1.0f, 1.0f, 3.0f};
 Eigen::Vector3f Eye{2.0f, 0.0f, 4.0f};
 Eigen::Vector3f Center{0.0f, 0.0f, 0.0f};
 Eigen::Vector3f Up{0.0f, 1.0f, 0.0f};
 
-int main(int argc, char **argv)
+int main()
 {
     float *zbuffer      = new float[width * height];
     float *shadowbuffer = new float[width * height];
@@ -33,7 +29,7 @@ int main(int argc, char **argv)
 
     TGAImage frame(width, height, TGAImage::RGB);
 
-    lookat(Eye,Center,Up);
+    lookat(Eye, Center, Up);
     viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
     projection(-1.f / (Eye - Center).norm());
 
@@ -47,16 +43,29 @@ int main(int argc, char **argv)
 
     for (int m = 0; m < 1; m++)
     {
-        model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
-        Shader shader;
-        Render render(model, shader, &frame, zbuffer);
-        render.Rendering();
+        // model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
+        amodel = new Amodel(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Fox\glTF\Fox.gltf)");
 
-        delete model;
+        for (int i = 0; i < 1024; i++)
+        {
+            for (int j = 0; j < 1024; j++)
+            {
+
+                Eigen::Vector2f uv{i,j};
+                TGAColor color=amodel->diffuse(uv);
+                frame.set(i,j,color);
+            }
+        }
+
+        // Shader shader;
+        // Render render(amodel, shader, &frame, zbuffer);
+        // render.Rendering();
+
+        delete amodel;
     }
 
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
-    frame.write_tga_file("cramebuffer.tga");
+    frame.write_tga_file("fox.tga");
 
     delete[] zbuffer;
     return 0;

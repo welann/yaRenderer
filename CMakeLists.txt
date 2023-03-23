@@ -10,7 +10,7 @@ project(yaRenderer LANGUAGES CXX C)
 # target
 add_executable(yaRenderer "")
 set_target_properties(yaRenderer PROPERTIES OUTPUT_NAME "yaRenderer")
-set_target_properties(yaRenderer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/windows/x86/release")
+set_target_properties(yaRenderer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/windows/x86/debug")
 target_include_directories(yaRenderer PRIVATE
     src/include
     src/shader
@@ -24,20 +24,17 @@ target_include_directories(yaRenderer PRIVATE
     C:/Users/wzcin/AppData/Local/.xmake/packages/a/assimp/v5.2.5/d9dd1f2adb6b4eaba46d26cb4807ec39/include
     C:/Users/wzcin/AppData/Local/.xmake/packages/z/zlib/v1.2.13/01dba5cf18044069baac5e77ea4c85fa/include
 )
-target_compile_options(yaRenderer PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-DNDEBUG>
-    $<$<COMPILE_LANGUAGE:CXX>:-DNDEBUG>
-)
 set_target_properties(yaRenderer PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_features(yaRenderer PRIVATE cxx_std_14)
 if(MSVC)
-    target_compile_options(yaRenderer PRIVATE $<$<CONFIG:Release>:-Ox -fp:fast>)
+    target_compile_options(yaRenderer PRIVATE $<$<CONFIG:Debug>:-Od>)
 else()
-    target_compile_options(yaRenderer PRIVATE -O3)
+    target_compile_options(yaRenderer PRIVATE -O0)
 endif()
 if(MSVC)
+    target_compile_options(yaRenderer PRIVATE -Zi)
 else()
-    target_compile_options(yaRenderer PRIVATE -fvisibility=hidden)
+    target_compile_options(yaRenderer PRIVATE -g)
 endif()
 if(MSVC)
     set_property(TARGET yaRenderer PROPERTY

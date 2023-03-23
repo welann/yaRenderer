@@ -15,7 +15,7 @@ void lookat(Eigen::Vector3f eye, Eigen::Vector3f center, Eigen::Vector3f up);
 class Render
 {
 private:
-    Model    *model = nullptr;
+    Amodel    *model = nullptr;
     Shader   &shader;
     TGAImage *image;
     float    *zbuffer;
@@ -24,7 +24,7 @@ private:
 public:
     void triangle(Eigen::Matrix<float, 4, 3> &clipc, IShader &shader, TGAImage &image, float *zbuffer);
 
-    Render(Model *&m, Shader &sh, TGAImage *im, float *zb) : model(m), shader(sh), image(im), zbuffer(zb) {}
+    Render(Amodel *m, Shader &sh, TGAImage *im, float *zb) : model(m), shader(sh), image(im), zbuffer(zb) {}
     void Rendering()
     {
         for (int i = 0; i < model->nfaces(); i++)
@@ -33,6 +33,7 @@ public:
             {
                 shader.vertex(i, j);
             }
+            std::cout<<"face: "<<i<<std::endl;
             triangle(shader.varying_triMatrix, shader, *image, zbuffer);
         }
     }

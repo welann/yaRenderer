@@ -5,9 +5,9 @@ set_languages("c++14")
 add_includedirs("src/include")
 add_includedirs("src/shader")
 add_includedirs("src/external/imgui","src/external/imgui/backends")
+add_includedirs("src/external")
 
-
-add_requires("glm","eigen")
+add_requires("eigen")
 add_requires("glfw")
 add_requires("assimp")
 -- add_requires("imgui", {configs = {glfw_opengl3 = true }})
@@ -15,7 +15,13 @@ add_requires("assimp")
 target("yaRenderer")
     set_kind("binary")
     add_files("src/main.cpp","src/include/*.cpp")
-    add_packages("glm","eigen","assimp")
+    add_packages("eigen","assimp")
+
+
+-- target("test")
+--     set_kind("binary")
+--     add_files("src/test.cpp","src/include/*.cpp")
+--     add_packages("eigen","assimp")
 
 -- target("test")
 --     set_kind("binary")
@@ -87,6 +93,4 @@ target("yaRenderer")
 --    add_cxflags("-stdnolib", "-fno-strict-aliasing")
 --    add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
 --
--- @endcode
---
-
+-- @endcode 
