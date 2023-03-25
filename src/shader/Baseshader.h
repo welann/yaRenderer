@@ -20,7 +20,6 @@ struct Shader : public IShader
     bool discard_face(int iface){
         Eigen::Vector3f lookdir;
         lookdir<<ModelViewMatrix(2,0),ModelViewMatrix(2,1),ModelViewMatrix(2,2);
-        std::cout <<"lookdir: "<< lookdir <<std::endl;
 
         Eigen::Vector3f vert0 =amodel->vert(iface, 0);
         Eigen::Vector3f vert1 =amodel->vert(iface, 1);
@@ -36,25 +35,23 @@ struct Shader : public IShader
 
     virtual Eigen::Vector4f vertex(int iface, int nthvert)
     {
-        // varying_uv.set_col(nthvert, model->uv(iface, nthvert));
         varying_uvMatrix.col(nthvert) = amodel->uv(iface, nthvert);
 
-        // Vec3f           vert = model->vert(iface, nthvert);
         Eigen::Vector3f vert =amodel->vert(iface, nthvert);
         Eigen::Vector4f inflateVert;
         inflateVert << vert, 1.0f;
-        Eigen::Vector4f Gl_Vertex = ProjectionMatrix * ModelViewMatrix * inflateVert;
+        Eigen::Vector4f Gl_Vertex = ProjectionMatrix * ViewportMatrix* ModelViewMatrix * inflateVert;
 
         varying_triMatrix.col(nthvert) = Gl_Vertex;
 
         return Gl_Vertex;
     }
 
-    virtual bool fragment(Vec3f bar, TGAColor &color)
+    virtual bool fragment(Eigen::Vector3f bar, TGAColor &color)
     {
 
-        Eigen::Vector3f temp(bar.x, bar.y, bar.z);
-        Eigen::Vector2f euv=varying_uvMatrix * temp;
+        // Eigen::Vector3f temp(bar.x, bar.y, bar.z);
+        Eigen::Vector2f euv=varying_uvMatrix * bar;
  
         color=amodel->diffuse(euv);
         // std::cout << (int)color.bgra[0]<<" : "<<(int)color.bgra[1]<< " : "<<(int)color.bgra[2]<< " : "<<(int)color.bgra[3]<<std::endl;

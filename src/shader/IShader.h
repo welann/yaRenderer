@@ -9,5 +9,5 @@ struct IShader
 {
     virtual ~IShader(){};
     virtual Eigen::Vector4f vertex(int iface, int nthvert)       = 0;
-    virtual bool  fragment(Vec3f bar, TGAColor &color) = 0;
+    virtual bool  fragment(Eigen::Vector3f bar, TGAColor &color) = 0;
 };

@@ -12,19 +12,19 @@ const int width  = 1024;
 const int height = 1024;
 
 Eigen::Vector3f Light_dir{1.0f, 1.0f, 3.0f};
-Eigen::Vector3f Eye{4.0f, 3.0f, 6.0f};
+Eigen::Vector3f Eye{4.0f, 3.0f, 16.0f};
 Eigen::Vector3f Center{0.0f, 0.0f, 0.0f};
 Eigen::Vector3f Up{0.0f, 1.0f, 0.0f};
 
 int main()
 {
-    float *zbuffer      = new float[width * height];
+    TGAImage zbuffer(width, height, TGAImage::GRAYSCALE);
     float *shadowbuffer = new float[width * height];
 
-    for (int i = width * height; --i;)
-    {
-        zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
-    }
+    // for (int i = width * height; --i;)
+    // {
+    //     zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
+    // }
 
     TGAImage frame(width, height, TGAImage::RGB);
 
@@ -42,20 +42,21 @@ int main()
 
     for (int m = 0; m < 1; m++)
     {
-        // model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
         amodel = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\Box With Spaces.gltf)");
 
 
         Shader shader;
-        Render render(amodel, shader, &frame, zbuffer);
+        Render render(amodel, shader, &frame, &zbuffer);
         render.Rendering();
 
         delete amodel;
     }
+    
+    zbuffer.write_tga_file("zbuffer.tga");
 
     frame.flip_vertically(); // to place the origin in the bottom left corner of the image
-    frame.write_tga_file("box.tga");
+    frame.write_tga_file("Fox.tga");
 
-    delete[] zbuffer;
+    // delete[] zbuffer;
     return 0;
 }

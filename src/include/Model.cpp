@@ -47,18 +47,18 @@ Model::Model(std::string modelpath)
         // 随后新建一个TGAImage对象读取这个tga文件
         // 最后把这个对象复制给_material相对应的贴图里
 
-        std::string temp     = R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\)";
+        std::string temp     = R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Fox\glTF\)";
         std::string fullPath = std::string(temp + texturePath.C_Str());
         int         width, height, channels;
         std::cout<<"fullPath: "<<fullPath<<std::endl;
 
         unsigned char* data   = stbi_load(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\glTF Logo With Spaces.png)", &width, &height, &channels, 0);
-        int            result = stbi_write_tga("frame0.tga", width, height, channels, data);
+        int            result = stbi_write_tga("tempdiffuse.tga", width, height, channels, data);
 
-        TGAImage frame1(1024, 1024, TGAImage::RGB);
-        frame1.read_tga_file("frame0.tga");
+        TGAImage tempdiffuse(1024, 1024, TGAImage::RGB);
+        tempdiffuse.read_tga_file("tempdiffuse.tga");
 
-        TGAImage tempdiffuse(frame1);
+        // TGAImage tempdiffuse(frame1);
         // tempdiffuse.write_tga_file("tempdiffuse.tga");
         _material.setTexture(TextureKind::diffuse, tempdiffuse);
 

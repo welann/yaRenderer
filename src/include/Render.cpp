@@ -1,4 +1,6 @@
 #include "Render.h"
+#include "Eigen/src/Core/Matrix.h"
+#include "tgaimage.h"
 
 Eigen::Matrix4f ModelViewMatrix;
 Eigen::Matrix4f ViewportMatrix;
@@ -37,11 +39,11 @@ void lookat(Eigen::Vector3f eye1, Eigen::Vector3f center1, Eigen::Vector3f up1)
     }
 }
 
-Eigen::Vector3f barycentric(Eigen::Vector2f A, Eigen::Vector2f B, Eigen::Vector2f C, Eigen::Vector2i P)
+Eigen::Vector3f barycentric(const Eigen::Matrix<float, 3, 2> &Tri, Eigen::Vector2i P)
 {
-    Eigen::Vector3f A1(A[0], A[1], 1);
-    Eigen::Vector3f B1(B[0], B[1], 1);
-    Eigen::Vector3f C1(C[0], C[1], 1);
+    Eigen::Vector3f A1(Tri(0, 0), Tri(0, 1), 1);
+    Eigen::Vector3f B1(Tri(1, 0), Tri(1, 1), 1);
+    Eigen::Vector3f C1(Tri(2, 0), Tri(2, 1), 1);
     Eigen::Vector3f P1(P[0], P[1], 1);
 
     Eigen::Vector3f v0 = B1 - A1;
@@ -63,9 +65,10 @@ Eigen::Vector3f barycentric(Eigen::Vector2f A, Eigen::Vector2f B, Eigen::Vector2
     return ans;
 }
 
-void Render::triangle(Eigen::Matrix<float, 4, 3> &clipc, IShader &shader, TGAImage &image, float *zbuffer)
+void Render::triangle(Eigen::Matrix<float, 4, 3> &clipc, IShader &shader, TGAImage &image, TGAImage *zbuffer)
 {
-    Eigen::Matrix<float, 3, 4> pts = (ViewportMatrix * clipc).transpose();
+    // std::cout<<"clip: "<<clipc<<std::endl;
+    Eigen::Matrix<float, 3, 4> pts = ( clipc).transpose();
     Eigen::Matrix<float, 3, 2> pts2;
     for (int i = 0; i < 3; i++)
     {
@@ -88,32 +91,45 @@ void Render::triangle(Eigen::Matrix<float, 4, 3> &clipc, IShader &shader, TGAIma
     }
 
     Eigen::Vector2i P;
-    TGAColor        color(255, 255, 255);
-    int             cou = 0;
+#pragma omp parallel for
     for (P[0] = bboxmin[0]; P[0] <= bboxmax[0]; P[0]++)
     {
         for (P[1] = bboxmin[1]; P[1] <= bboxmax[1]; P[1]++)
         {
-            Eigen::Vector3f bc_screen = barycentric(pts2.row(0), pts2.row(1), pts2.row(2), P);
+            Eigen::Vector3f bc_screen = barycentric(pts2, P);
             Eigen::Vector3f bc_clip;
             bc_clip << bc_screen[0] / pts(0, 3), bc_screen[1] / pts(1, 3), bc_screen[2] / pts(2, 3);
 
-            float ttemp = bc_clip.sum();
-            bc_clip << bc_clip / ttemp;
+            bc_clip << bc_clip / bc_clip.sum();
             // bc_clip.normalize();
-
             Eigen::Vector3f zdepth;
-            zdepth           = clipc.row(2);
-            float frag_depth = zdepth.dot(bc_clip);
+            zdepth << pts.col(2);
 
-            if (bc_screen[0] < 0 || bc_screen[1] < 0 || bc_screen[2] < 0 || zbuffer[P[0] + P[1] * image.get_width()] > frag_depth) continue;
+            float frag_depth = pts.col(2).dot(bc_clip);
 
-            TGAColor color;
-            Vec3f    bt(bc_clip[0], bc_clip[1], bc_clip[2]);
-            bool     discard = shader.fragment(bt, color);
+            if (bc_screen[0] < 0 || bc_screen[1] < 0 || bc_screen[2] < 0 || zbuffer->get(P[0], P[1])[0] > frag_depth) continue;
+
+            TGAColor        color;
+            Eigen::Vector3f bt(bc_clip[0], bc_clip[1], bc_clip[2]);
+            bool            discard = shader.fragment(bt, color);
+
             if (!discard)
             {
-                zbuffer[P[0] + P[1] * image.get_width()] = frag_depth;
+                // std::cout << "pts: \n"
+                //           << pts << std::endl;
+                // std::cout << "clipc: \n"
+                //           << clipc << std::endl;
+                // std::cout << "bc_screen: \n"
+                //           << bc_screen << std::endl;
+                // std::cout << "bc_clip: \n"
+                //           << bc_clip << std::endl;
+                // std::cout << "zdepth before clip: \n"
+                //           << zdepth << std::endl;
+                // std::cout << "frag_depth: \n"
+                //           << frag_depth << std::endl;
+
+                // std::cout << "zbuffer: " << (int)zbuffer->data[0] << std::endl;
+                zbuffer->set(P[0], P[1], TGAColor(frag_depth));
                 image.set(P[0], P[1], color);
             }
         }
