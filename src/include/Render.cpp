@@ -22,10 +22,6 @@ void projection(float coeff)
 
 void lookat(Eigen::Vector3f eye1, Eigen::Vector3f center1, Eigen::Vector3f up1)
 {
-//     Eigen::Vector3f eye1(eye.x, eye.y, eye.z);
-//     Eigen::Vector3f center1(center.x, center.y, center.z);
-//     Eigen::Vector3f up1(up.x, up.y, up.z);
-
     Eigen::Vector3f z1 = (eye1 - center1).normalized();
     Eigen::Vector3f x1 = (up1.cross(z1)).normalized();
     Eigen::Vector3f y1 = (z1.cross(x1)).normalized();

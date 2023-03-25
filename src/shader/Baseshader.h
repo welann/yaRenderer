@@ -1,11 +1,10 @@
-#include "../include/model.h"
 #include "IShader.h"
-#include "Amodel.h"
+#include "Model.h"
 
 #include <Eigen/Dense>
 
 // extern Model  *model;
-extern Amodel *amodel;
+extern Model *amodel;
 
 extern Eigen::Matrix4f ModelViewMatrix;
 extern Eigen::Matrix4f ViewportMatrix;
@@ -17,6 +16,23 @@ struct Shader : public IShader
 
     Eigen::Matrix<float, 2, 3> varying_uvMatrix;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
     Eigen::Matrix<float, 4, 3> varying_triMatrix; // triangle coordinates (screen space), written by VS, read by FS
+
+    bool discard_face(int iface){
+        Eigen::Vector3f lookdir;
+        lookdir<<ModelViewMatrix(2,0),ModelViewMatrix(2,1),ModelViewMatrix(2,2);
+        std::cout <<"lookdir: "<< lookdir <<std::endl;
+
+        Eigen::Vector3f vert0 =amodel->vert(iface, 0);
+        Eigen::Vector3f vert1 =amodel->vert(iface, 1);
+        Eigen::Vector3f vert2 =amodel->vert(iface, 2);
+
+        Eigen::Vector3f normal=(vert2-vert0).cross(vert1-vert0);
+
+        float temp=normal.dot(lookdir);
+        if(temp>0) return true;
+        return false;
+    }
+
 
     virtual Eigen::Vector4f vertex(int iface, int nthvert)
     {

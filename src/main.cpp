@@ -6,14 +6,13 @@
 
 #include <Eigen/Dense>
 
-Model  *model  = nullptr;
-Amodel *amodel = nullptr;
+Model *amodel = nullptr;
 
 const int width  = 1024;
 const int height = 1024;
 
 Eigen::Vector3f Light_dir{1.0f, 1.0f, 3.0f};
-Eigen::Vector3f Eye{2.0f, 3.0f, 6.0f};
+Eigen::Vector3f Eye{4.0f, 3.0f, 6.0f};
 Eigen::Vector3f Center{0.0f, 0.0f, 0.0f};
 Eigen::Vector3f Up{0.0f, 1.0f, 0.0f};
 
@@ -44,7 +43,7 @@ int main()
     for (int m = 0; m < 1; m++)
     {
         // model = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\diablo3_pose\diablo3_pose.obj)");
-        amodel = new Amodel(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\Box With Spaces.gltf)");
+        amodel = new Model(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\Box With Spaces.gltf)");
 
 
         Shader shader;

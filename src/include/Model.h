@@ -12,11 +12,11 @@
 
 using namespace Assimp;
 
-class Amodel
+class Model
 {
 public:
-    explicit Amodel(std::string modelpath);
-    ~Amodel()= default;;
+    explicit Model(std::string modelpath);
+    ~Model()= default;;
 
     void      loadTexture(TextureKind kind, const std::string& filepath);
     TGAImage* getTexture(TextureKind);

@@ -1,7 +1,7 @@
 // #include "Eigen/src/Core/Matrix.h"
 #include <Eigen/Dense>
 #include "assimp/mesh.h"
-#include "include/Amodel.h"
+#include "include/Model.h"
 #include <vector>
 class mod
 {

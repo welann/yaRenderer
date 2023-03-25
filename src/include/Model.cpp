@@ -1,10 +1,10 @@
-#include "Amodel.h"
+#include "Model.h"
 #include <iostream>
 #include "tgaimage.h"
 #include "../external/stb_image.h"
 #include "../external/stb_image_write.h"
 
-Amodel::Amodel(std::string modelpath)
+Model::Model(std::string modelpath)
 {
     Assimp::Importer importer;
     const aiScene*   scene = importer.ReadFile(modelpath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
@@ -71,7 +71,7 @@ Amodel::Amodel(std::string modelpath)
     // }
 }
 
-void Amodel::loadTexture(const TextureKind kind, const std::string& filepath)
+void Model::loadTexture(const TextureKind kind, const std::string& filepath)
 {
     TGAImage img;
     img.read_tga_file(filepath.c_str());
@@ -80,22 +80,22 @@ void Amodel::loadTexture(const TextureKind kind, const std::string& filepath)
     _material.setTexture(kind, img);
 }
 
-TGAImage* Amodel::getTexture(TextureKind kind)
+TGAImage* Model::getTexture(TextureKind kind)
 {
     return _material[kind];
 }
 
-size_t Amodel::nverts()
+size_t Model::nverts()
 {
     return vertices.size();
 }
 
-size_t Amodel::nfaces()
+size_t Model::nfaces()
 {
     return faces.size();
 }
 
-Eigen::Vector3f Amodel::normal(int iface, int nthvert)
+Eigen::Vector3f Model::normal(int iface, int nthvert)
 {
     aiFace     face  = faces[iface];
     int        index = face.mIndices[nthvert];
@@ -103,13 +103,13 @@ Eigen::Vector3f Amodel::normal(int iface, int nthvert)
     return {n.x, n.y, n.z};
 }
 
-Eigen::Vector3f Amodel::vert(int i)
+Eigen::Vector3f Model::vert(int i)
 {
     aiVector3D v = vertices[i];
     return {v.x, v.y, v.z};
 }
 
-Eigen::Vector3f Amodel::vert(int iface, int nthvert)
+Eigen::Vector3f Model::vert(int iface, int nthvert)
 {
     aiFace     face  = faces[iface];
     int        index = face.mIndices[nthvert];
@@ -117,7 +117,7 @@ Eigen::Vector3f Amodel::vert(int iface, int nthvert)
     return {v.x, v.y, v.z};
 }
 
-Eigen::Vector2f Amodel::uv(int iface, int nthvert)
+Eigen::Vector2f Model::uv(int iface, int nthvert)
 {
     aiFace     face  = faces[iface];
     int        index = face.mIndices[nthvert];
@@ -125,14 +125,14 @@ Eigen::Vector2f Amodel::uv(int iface, int nthvert)
     return {uv.x, uv.y};
 }
 
-Eigen::Vector3f Amodel::normal(Eigen::Vector2f uvf)
+Eigen::Vector3f Model::normal(Eigen::Vector2f uvf)
 {
     TGAImage*       normal = getTexture(TextureKind::normal);
     Eigen::Vector3i temp((int)(uvf[0] * normal->get_width()), (int)(uvf[1] * normal->get_height()));
     return temp.cast<float>();
 }
 
-TGAColor Amodel::diffuse(Eigen::Vector2f uv)
+TGAColor Model::diffuse(Eigen::Vector2f uv)
 {
     //    TGAImage*       diff = getTexture(TextureKind::diffuse);
     // std::cout << "uv: \n"
@@ -147,7 +147,7 @@ TGAColor Amodel::diffuse(Eigen::Vector2f uv)
     return diff->get(uvi[0], uvi[1]);
 }
 
-float Amodel::specular(Eigen::Vector2f uv)
+float Model::specular(Eigen::Vector2f uv)
 {
     TGAImage*       specular = getTexture(TextureKind::diffuse);
     Eigen::Vector2i uvi{uv[0] * specular->get_width(), uv[1] * specular->get_height()};
