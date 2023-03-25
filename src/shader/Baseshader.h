@@ -36,13 +36,12 @@ struct Shader : public IShader
 
     virtual bool fragment(Vec3f bar, TGAColor &color)
     {
-        Vec2f uv = varying_uv * bar;
 
         Eigen::Vector3f temp(bar.x, bar.y, bar.z);
         Eigen::Vector2f euv=varying_uvMatrix * temp;
-
-        // color = model->diffuse(uv);
+ 
         color=amodel->diffuse(euv);
+        // std::cout << (int)color.bgra[0]<<" : "<<(int)color.bgra[1]<< " : "<<(int)color.bgra[2]<< " : "<<(int)color.bgra[3]<<std::endl;
         return false;
     }
 };

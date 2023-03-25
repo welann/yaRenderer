@@ -36,8 +36,8 @@ Amodel::Amodel(std::string modelpath)
     }
 
     const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    for (unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++)
-    {
+    // for (unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++)
+    // {
         aiString texturePath;
         material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
@@ -47,11 +47,12 @@ Amodel::Amodel(std::string modelpath)
         // 随后新建一个TGAImage对象读取这个tga文件
         // 最后把这个对象复制给_material相对应的贴图里
 
-        std::string temp     = "C:/Users/wzcin/CLionProjects/yaRenderer/models/Fox/glTF/";
+        std::string temp     = R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\)";
         std::string fullPath = std::string(temp + texturePath.C_Str());
         int         width, height, channels;
+        std::cout<<"fullPath: "<<fullPath<<std::endl;
 
-        unsigned char* data   = stbi_load(fullPath.c_str(), &width, &height, &channels, 0);
+        unsigned char* data   = stbi_load(R"(C:\Users\wzcin\CLionProjects\yaRenderer\models\Box With Spaces\glTF\glTF Logo With Spaces.png)", &width, &height, &channels, 0);
         int            result = stbi_write_tga("frame0.tga", width, height, channels, data);
 
         TGAImage frame1(1024, 1024, TGAImage::RGB);
@@ -67,8 +68,7 @@ Amodel::Amodel(std::string modelpath)
         std::cout << "width: " << width << std::endl;
         std::cout << "height: " << height << std::endl;
         std::cout << "channels: " << channels << std::endl;
-        // 小狐狸模型目前只有一张贴图
-    }
+    // }
 }
 
 void Amodel::loadTexture(const TextureKind kind, const std::string& filepath)
@@ -138,8 +138,10 @@ TGAColor Amodel::diffuse(Eigen::Vector2f uv)
     // std::cout << "uv: \n"
             //   << uv << std::endl;
     TGAImage*       diff = _material[TextureKind::diffuse];
-    // Eigen::Vector2i uvi{uv[0] * diff->get_width(), uv[1] * diff->get_height()};
-    Eigen::Vector2i uvi(uv.cast<int>());
+    Eigen::Vector2i uvi{uv[0] * diff->get_width(), uv[1] * diff->get_height()};
+    // Eigen::Vector2i uvi(uv.cast<int>());
+    // std::cout << "uv: \n"
+    //           << uv << std::endl;
     // std::cout << "uvi: \n"
     //           << uvi << std::endl;
     return diff->get(uvi[0], uvi[1]);
